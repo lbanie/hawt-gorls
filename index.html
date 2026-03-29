@@ -438,7 +438,7 @@ function App(){
 
     try{
 
-      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:"You are a literary editor. List 8 real books: new releases 2025-2026, trending book club picks, or buzzy literary fiction. Respond ONLY with valid JSON, no markdown: {\"items\":[{\"title\":\"...\",\"author\":\"...\",\"tag\":\"...\",\"blurb\":\"...\",\"source\":\"...\"}]}. tag options: New Release, Book Club Pick, Critic's Darling, Debut Novel, Buzzy Read, Award Winner. blurb: max 12 words. source: real publication name."}]})});
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","x-api-key": "ANTHROPIC_API_KEY"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:"You are a literary editor. List 8 real books: new releases 2025-2026, trending book club picks, or buzzy literary fiction. Respond ONLY with valid JSON, no markdown: {\"items\":[{\"title\":\"...\",\"author\":\"...\",\"tag\":\"...\",\"blurb\":\"...\",\"source\":\"...\"}]}. tag options: New Release, Book Club Pick, Critic's Darling, Debut Novel, Buzzy Read, Award Winner. blurb: max 12 words. source: real publication name."}]})});
 
       const data=await res.json();
 
@@ -462,7 +462,7 @@ function App(){
 
     try{
 
-      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:900,messages:[{role:"user",content:"Food curator for book club reading "+BOOK.title+" by "+BOOK.author+". Setting: "+BOOK.setting+". Avoid these allergies: "+(allergies||"none")+". Respond ONLY with valid JSON no markdown: {\"hostMain\":[{\"name\":\"...\",\"desc\":\"...\",\"bookTie\":\"...\"}],\"guestBrings\":[{\"name\":\"...\",\"desc\":\"...\"}],\"drinks\":[{\"name\":\"...\",\"desc\":\"...\"}],\"bookTheme\":\"...\"}"}]})});
+      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01","x-api-key": "ANTHROPIC_API_KEY"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:900,messages:[{role:"user",content:"Food curator for book club reading "+BOOK.title+" by "+BOOK.author+". Setting: "+BOOK.setting+". Avoid these allergies: "+(allergies||"none")+". Respond ONLY with valid JSON no markdown: {\"hostMain\":[{\"name\":\"...\",\"desc\":\"...\",\"bookTie\":\"...\"}],\"guestBrings\":[{\"name\":\"...\",\"desc\":\"...\"}],\"drinks\":[{\"name\":\"...\",\"desc\":\"...\"}],\"bookTheme\":\"...\"}"}]})});
 
       const data=await res.json();
 
