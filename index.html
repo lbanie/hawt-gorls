@@ -78,7 +78,7 @@ const MEM0=[
   {id:12,name:"Kacy Trumbo",allergies:"",dietary:"",canHost:false,bringing:"",rsvp:"",virtual:true,address:"",pickedThisYear:false},
 ];
 const TAG_COLS={"New Release":["#E8A0A8","rgba(232,160,168,0.14)"],"Book Club Pick":["#6AAA84","rgba(106,170,132,0.14)"],"Critic's Darling":["#D4A84A","rgba(212,168,74,0.14)"],"Debut Novel":["#70B8CC","rgba(112,184,204,0.14)"],"Buzzy Read":["#D4607A","rgba(212,96,122,0.14)"],"Award Winner":["#D4A84A","rgba(212,168,74,0.14)"]};
-const gbCover=isbn=>`https://books.google.com/books/content?vid=ISBN${isbn}&printsec=frontcover&img=1&zoom=2`;
+const gbCover=isbn=>`https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`;
 
 const T={bg:"#152B20",bg2:"#1C3829",bg3:"#234532",bg4:"#2A5240",card:"#1E3D2C",cream:"#F2EDE3",creamMid:"#C8BFA8",creamDim:"#8A8070",blush:"#E8A0A8",blushSoft:"rgba(232,160,168,0.14)",pink:"#D4607A",pinkSoft:"rgba(212,96,122,0.14)",gold:"#D4A84A",goldSoft:"rgba(212,168,74,0.14)",sage:"#6AAA84",sageSoft:"rgba(106,170,132,0.14)",sky:"#70B8CC",skySoft:"rgba(112,184,204,0.14)",border:"rgba(255,255,255,0.08)",borderMed:"rgba(255,255,255,0.16)"};
 const SERIF="Georgia,serif";
@@ -243,8 +243,16 @@ function App(){
   useEffect(()=>{
     if(view!=="home")return;
     const el=beltRef.current;if(!el)return;
-    let x=0,raf;
-    const tick=()=>{x-=0.3;if(Math.abs(x)>=el.scrollWidth/2)x=0;el.style.transform="translateX("+x+"px)";raf=requestAnimationFrame(tick);};
+    let x=0,raf,last=null;
+    const speed=0.6;
+    const tick=(ts)=>{
+      if(last!==null){const dt=ts-last;x-=speed*(dt/16);}
+      last=ts;
+      const half=el.scrollWidth/3;
+      if(Math.abs(x)>=half)x=x+half;
+      el.style.transform=`translateX(${x}px)`;
+      raf=requestAnimationFrame(tick);
+    };
     raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf);
   },[view]);
 
@@ -254,10 +262,17 @@ function App(){
 
   const BottomNav=()=>(
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:T.bg2,borderTop:"1px solid "+T.border,display:"flex",zIndex:100,paddingBottom:"env(safe-area-inset-bottom)"}}>
-      {[["🏠","Home","home"],["👤","Profile","member"],["📚","Noms","nominations"],["⚙️","Admin","pinPrompt"]].map(([icon,label,v])=>(
-        <button key={v} onClick={()=>setView(v)} style={{flex:1,background:"none",border:"none",padding:"10px 4px 8px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-          <span style={{fontSize:20}}>{icon}</span>
-          <span style={{fontSize:10,color:view===v?T.blush:T.creamDim,fontWeight:view===v?700:400}}>{label}</span>
+      {[
+        ["M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z","Home","home"],
+        ["M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z","Profile","member"],
+        ["M18 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2zM9 4h1v8l-2-2-2 2V4h3zm9 16H6V4h1v9l3-3 3 3V4h5v16z","Noms","nominations"],
+        ["M12 2a10 10 0 100 20A10 10 0 0012 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z","Admin","pinPrompt"]
+      ].map(([path,label,v])=>(
+        <button key={v} onClick={()=>setView(v)} style={{flex:1,background:"none",border:"none",padding:"8px 4px 6px",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+          <div style={{width:40,height:40,borderRadius:10,background:view===v?T.blushSoft:"rgba(255,255,255,0.08)",border:"1px solid "+(view===v?T.blush:"rgba(255,255,255,0.15)"),display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill={view===v?T.blush:T.creamDim}><path d={path}/></svg>
+          </div>
+          <span style={{fontSize:12,color:view===v?T.blush:T.creamDim,fontWeight:view===v?700:500}}>{label}</span>
         </button>
       ))}
     </div>
@@ -402,8 +417,8 @@ function App(){
           ))}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:24}}>
-          <button onClick={()=>mkICS(hostAddr)} style={{...sl(T.blush),padding:"11px 6px",fontSize:12,whiteSpace:"nowrap"}}>📅 Calendar</button>
-          <a href={ZOOM} target="_blank" rel="noreferrer" style={{...sl(T.sky),padding:"11px 6px",fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",whiteSpace:"nowrap"}}>🎥 Zoom</a>
+          <button onClick={()=>mkICS(hostAddr)} style={{...sl(T.blush),padding:"11px 6px",fontSize:12,whiteSpace:"nowrap"}}>Calendar</button>
+          <a href={ZOOM} target="_blank" rel="noreferrer" style={{...sl(T.sky),padding:"11px 6px",fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",whiteSpace:"nowrap"}}>Zoom</a>
           <a href={NOTES} target="_blank" rel="noreferrer" style={{...sl(T.sage),padding:"11px 6px",fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",whiteSpace:"nowrap"}}>📝 Notes</a>
         </div>
         <svg width="100%" height="20" viewBox="0 0 400 20" preserveAspectRatio="none" style={{display:"block",marginBottom:-1}}>
