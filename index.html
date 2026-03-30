@@ -23,12 +23,32 @@ select option{background:#234532;color:#F2EDE3}
 <script type="text/babel" data-presets="react">
 const {useState,useEffect,useRef} = React;
 
+// ── STORAGE HELPERS ──
+// We use a free JSONBin.io bin as a tiny shared database.
+// Create a free account at jsonbin.io, make a bin, and paste the bin ID and API key below.
+const BIN_ID = "69ca13a0856a682189df4712";
+const BIN_KEY = "$2a$10$UpZuOUjGhgLLDsc54aV12OVbvwFzNeEFr89po1SqPrQz7CvbHgjUS";
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+async function loadData(){
+  try{
+    const r=await fetch(BIN_URL+"/latest",{headers:{"X-Master-Key":BIN_KEY,"X-Bin-Meta":false}});
+    if(!r.ok)return null;
+    return await r.json();
+  }catch(e){return null;}
+}
+
+async function saveData(data){
+  try{
+    await fetch(BIN_URL,{method:"PUT",headers:{"Content-Type":"application/json","X-Master-Key":BIN_KEY},body:JSON.stringify(data)});
+  }catch(e){}
+}
+
 const GROUP_PW = "hawt1";
-const BOOK = {title:"Martyr!",author:"Kaveh Akbar",genre:"Literary Fiction",setting:"New York City / Iran"};
-const ROT = {currentHost:"Athena Levitch",currentPicker:"Laylee Banie",nextHost:"Erinne Davey",nextPicker:"Tyler Hill"};
-const POLL_OPTS = [{day:"Thursday",date:"May 7"},{day:"Friday",date:"May 8"},{day:"Saturday",date:"May 9"},{day:"Sunday",date:"May 10"}];
+const BOOK = {title:"Martyr!",author:"Kaveh Akbar"};
 const ZOOM = "https://us05web.zoom.us/j/83873906720?pwd=03Q9be6hK9Vr4OdFXTmVCfQ8v86KWV.1";
 const NOTES = "https://www.icloud.com/notes/02539w5ZpE0nKd4aZd39sVSNQ#HAWT_GORLZ_WHO_READ";
+const POLL_OPTS = [{day:"Thursday",date:"May 7"},{day:"Friday",date:"May 8"},{day:"Saturday",date:"May 9"},{day:"Sunday",date:"May 10"}];
 
 const FOOD = {
   bookTheme:"Persian and NYC-inspired — allergy-aware for the group.",
@@ -50,7 +70,7 @@ const FOOD = {
   ]
 };
 
-const FEED = {items:[
+const FEED={items:[
   {title:"The Familiar",author:"Leigh Bardugo",tag:"New Release",blurb:"Dark historical fantasy set in 15th-century Spain.",source:"Goodreads",link:"https://www.goodreads.com/book/show/61604756-the-familiar"},
   {title:"James",author:"Percival Everett",tag:"Award Winner",blurb:"Pulitzer-winning reimagining of Huckleberry Finn.",source:"Goodreads",link:"https://www.goodreads.com/book/show/40539567-james"},
   {title:"All Fours",author:"Miranda July",tag:"Buzzy Read",blurb:"Wildly original midlife novel everyone is talking about.",source:"Goodreads",link:"https://www.goodreads.com/book/show/125852273-all-fours"},
@@ -61,9 +81,7 @@ const FEED = {items:[
   {title:"Martyr!",author:"Kaveh Akbar",tag:"Critic's Darling",blurb:"Incandescent debut — addiction, grief and meaning.",source:"Goodreads",link:"https://www.goodreads.com/book/show/61714633-martyr"}
 ]};
 
-const NOMS0=[{id:1,title:"My Year of Rest and Relaxation",author:"Ottessa Moshfegh",nominatedBy:"Kayla",votes:3},{id:2,title:"Intermezzo",author:"Sally Rooney",nominatedBy:"Christie",votes:5},{id:3,title:"All Fours",author:"Miranda July",nominatedBy:"Danielle",votes:2},{id:4,title:"The Vegetarian",author:"Han Kang",nominatedBy:"Natalie",votes:4}];
-
-const PAST=[
+const PAST_DEFAULT=[
   {title:"Intermezzo",author:"Sally Rooney",col:"#1C2B3A",txt:"#7BAFD4",coverUrl:"https://covers.openlibrary.org/b/isbn/9780374614997-M.jpg"},
   {title:"All the Colors of the Dark",author:"Chris Whitaker",col:"#2A1A0E",txt:"#D4956A",coverUrl:"https://covers.openlibrary.org/b/isbn/9780593597736-M.jpg"},
   {title:"Wedding People",author:"Alison Espach",col:"#3A1A2A",txt:"#D47BAF",coverUrl:"https://covers.openlibrary.org/b/isbn/9781250284419-M.jpg"},
@@ -78,7 +96,7 @@ const PAST=[
   {title:"Dear Debbie",author:"Freida McFadden",col:"#2E0E1A",txt:"#E8879A",coverUrl:"https://covers.openlibrary.org/b/isbn/9781464249624-M.jpg"}
 ];
 
-const MEM0=[
+const MEM_DEFAULT=[
   {id:1,name:"Laylee Banie",allergies:"",dietary:"",canHost:true,bringing:"",rsvp:"",virtual:false,address:"",pickedThisYear:true},
   {id:2,name:"Tyler Hill",allergies:"Dairy",dietary:"No dairy",canHost:true,bringing:"",rsvp:"",virtual:false,address:"",pickedThisYear:false},
   {id:3,name:"Athena Levitch",allergies:"",dietary:"",canHost:true,bringing:"",rsvp:"",virtual:false,address:"",pickedThisYear:true},
@@ -93,17 +111,24 @@ const MEM0=[
   {id:12,name:"Kacy Trumbo",allergies:"",dietary:"",canHost:false,bringing:"",rsvp:"",virtual:true,address:"",pickedThisYear:false},
 ];
 
-const TAG_COLS={"New Release":["#E8A0A8","rgba(232,160,168,0.14)"],"Book Club Pick":["#6AAA84","rgba(106,170,132,0.14)"],"Critic's Darling":["#D4A84A","rgba(212,168,74,0.14)"],"Debut Novel":["#70B8CC","rgba(112,184,204,0.14)"],"Buzzy Read":["#D4607A","rgba(212,96,122,0.14)"],"Award Winner":["#D4A84A","rgba(212,168,74,0.14)"]};
+const NOMS_DEFAULT=[
+  {id:1,title:"My Year of Rest and Relaxation",author:"Ottessa Moshfegh",nominatedBy:"Kayla",votes:3},
+  {id:2,title:"Intermezzo",author:"Sally Rooney",nominatedBy:"Christie",votes:5},
+  {id:3,title:"All Fours",author:"Miranda July",nominatedBy:"Danielle",votes:2},
+  {id:4,title:"The Vegetarian",author:"Han Kang",nominatedBy:"Natalie",votes:4}
+];
 
+const ROT_DEFAULT={currentHost:"Athena Levitch",currentPicker:"Laylee Banie",nextHost:"Erinne Davey",nextPicker:"Tyler Hill"};
+const POLL_DEFAULT={Thursday:[],Friday:[],Saturday:[],Sunday:[]};
+
+const TAG_COLS={"New Release":["#E8A0A8","rgba(232,160,168,0.14)"],"Book Club Pick":["#6AAA84","rgba(106,170,132,0.14)"],"Critic's Darling":["#D4A84A","rgba(212,168,74,0.14)"],"Debut Novel":["#70B8CC","rgba(112,184,204,0.14)"],"Buzzy Read":["#D4607A","rgba(212,96,122,0.14)"],"Award Winner":["#D4A84A","rgba(212,168,74,0.14)"]};
 const T={bg:"#152B20",bg2:"#1C3829",bg3:"#234532",bg4:"#2A5240",card:"#1E3D2C",cream:"#F2EDE3",creamMid:"#C8BFA8",creamDim:"#8A8070",blush:"#E8A0A8",blushSoft:"rgba(232,160,168,0.14)",pink:"#D4607A",pinkSoft:"rgba(212,96,122,0.14)",gold:"#D4A84A",goldSoft:"rgba(212,168,74,0.14)",sage:"#6AAA84",sageSoft:"rgba(106,170,132,0.14)",sky:"#70B8CC",skySoft:"rgba(112,184,204,0.14)",border:"rgba(255,255,255,0.08)",borderMed:"rgba(255,255,255,0.16)"};
 const SERIF="Georgia,serif";
-
 const ini=n=>n.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
 const AC=[T.blush,T.gold,T.sage,T.sky,T.pink,"#A899D8"];
 const AB=[T.blushSoft,T.goldSoft,T.sageSoft,T.skySoft,T.pinkSoft,"rgba(168,153,216,0.14)"];
 const ac=i=>AC[i%AC.length];
 const ab=i=>AB[i%AB.length];
-
 const crd=(x)=>({background:T.card,borderRadius:16,border:"1px solid "+T.border,padding:"16px",marginBottom:12,...(x||{})});
 const inp={width:"100%",border:"1px solid rgba(0,0,0,0.15)",borderRadius:12,padding:"12px 14px",fontSize:16,background:"#fff",color:"#111",outline:"none",WebkitAppearance:"none"};
 const lbl={fontSize:11,fontWeight:700,color:T.creamDim,marginBottom:6,display:"block",letterSpacing:.8,textTransform:"uppercase"};
@@ -111,9 +136,9 @@ const gh=(col)=>({background:"transparent",border:"1px solid "+T.borderMed,borde
 const sl=c=>({background:c,color:["#D4A84A","#6AAA84"].includes(c)?"#152B20":"#F2EDE3",border:"none",borderRadius:12,padding:"12px 20px",cursor:"pointer",fontSize:14,fontWeight:700,width:"100%",textAlign:"center"});
 const pl=(c,bg)=>({background:bg,color:c,fontSize:10,fontWeight:700,padding:"3px 9px",borderRadius:20,letterSpacing:.4,textTransform:"uppercase",display:"inline-block",whiteSpace:"nowrap"});
 
-function mkICS(addr){
-  const loc=addr||ROT.currentHost+"'s place";
-  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//HawtGorlsWhoRead//EN","BEGIN:VEVENT","SUMMARY:Hawt Gorls Who Read - "+BOOK.title,"DESCRIPTION:Book: "+BOOK.title+"\\nHost: "+ROT.currentHost+"\\nZoom: "+ZOOM,"DTSTART;TZID=America/New_York:20260401T180000","DTEND;TZID=America/New_York:20260401T200000","LOCATION:"+loc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+function mkICS(addr,host){
+  const loc=addr||(host||"Host TBD")+"'s place";
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//HawtGorlsWhoRead//EN","BEGIN:VEVENT","SUMMARY:Hawt Gorls Who Read - "+BOOK.title,"DESCRIPTION:Book: "+BOOK.title+"\\nHost: "+(host||"TBD")+"\\nZoom: "+ZOOM,"DTSTART;TZID=America/New_York:20260401T180000","DTEND;TZID=America/New_York:20260401T200000","LOCATION:"+loc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));
   a.download="bookclub.ics";a.click();
@@ -121,7 +146,7 @@ function mkICS(addr){
 
 function Av({name,size,idx}){
   const s=size||36;
-  return <div style={{width:s,height:s,borderRadius:"50%",background:ab(idx||0),display:"flex",alignItems:"center",justifyContent:"center",fontSize:s*.32,fontWeight:700,color:ac(idx||0),flexShrink:0}}>{ini(name)}</div>;
+  return <div style={{width:s,height:s,borderRadius:"50%",background:ab(idx||0),display:"flex",alignItems:"center",justifyContent:"center",fontSize:s*.32,fontWeight:700,color:ac(idx||0),flexShrink:0}}>{ini(name||"?")}</div>;
 }
 
 function CoverSpine({title,col,txt,coverUrl,w,h}){
@@ -136,15 +161,45 @@ function CoverSpine({title,col,txt,coverUrl,w,h}){
   );
 }
 
-function MemberPage({members,setMembers,pollVotes,setPollVotes,pop}){
+function Spinner(){
+  return(
+    <div style={{minHeight:"100vh",background:T.bg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:16}}>
+      <div style={{width:40,height:40,border:"3px solid "+T.border,borderTop:"3px solid "+T.blush,borderRadius:"50%",animation:"spin 0.8s linear infinite"}}/>
+      <div style={{fontSize:13,color:T.creamDim}}>Loading...</div>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
+}
+
+function MemberPage({members,setMembers,pollVotes,setPollVotes,pop,onSave}){
   const [name,setName]=useState("");
   const [bringing,setBringing]=useState("");
   const [address,setAddress]=useState("");
   const m=members.find(x=>x.name===name)||null;
   function handleSelect(e){const n=e.target.value;setName(n);const f=members.find(x=>x.name===n);setBringing(f?f.bringing||"":"");setAddress(f?f.address||"":"");}
-  function save(patch){if(!m){pop("Select your name first");return;}setMembers(prev=>prev.map(x=>x.id===m.id?{...x,...patch}:x));pop("Saved!");}
-  function toggleDay(day){if(!m)return;setPollVotes(prev=>{const nv={...prev};const already=(nv[day]||[]).includes(m.id);nv[day]=already?nv[day].filter(x=>x!==m.id):[...(nv[day]||[]),m.id];return nv;});}
-  function cantMakeIt(){if(!m)return;setPollVotes(prev=>{const nv={...prev};Object.keys(nv).forEach(d=>{nv[d]=(nv[d]||[]).filter(x=>x!==m.id);});return nv;});pop("Response recorded!");}
+  function save(patch){
+    if(!m){pop("Select your name first");return;}
+    const updated=members.map(x=>x.id===m.id?{...x,...patch}:x);
+    setMembers(updated);
+    onSave({members:updated});
+    pop("Saved!");
+  }
+  function toggleDay(day){
+    if(!m)return;
+    const nv={...pollVotes};
+    const already=(nv[day]||[]).includes(m.id);
+    nv[day]=already?nv[day].filter(x=>x!==m.id):[...(nv[day]||[]),m.id];
+    setPollVotes(nv);
+    onSave({pollVotes:nv});
+  }
+  function cantMakeIt(){
+    if(!m)return;
+    const nv={...pollVotes};
+    Object.keys(nv).forEach(d=>{nv[d]=(nv[d]||[]).filter(x=>x!==m.id);});
+    setPollVotes(nv);
+    onSave({pollVotes:nv});
+    pop("Response recorded!");
+  }
   const voted=m?Object.values(pollVotes).flat().includes(m.id):false;
   const SP=({done})=>done?<span style={pl(T.sage,T.sageSoft)}>Done</span>:<span style={pl(T.blush,T.blushSoft)}>Pending</span>;
   const cs=(done)=>({...crd(),borderLeft:done?"3px solid "+T.sage:"3px solid "+T.blush});
@@ -208,30 +263,61 @@ function MemberPage({members,setMembers,pollVotes,setPollVotes,pop}){
 }
 
 function App(){
+  const [loading,setLoading]=useState(true);
+  const [binReady,setBinReady]=useState(false);
   const [authed,setAuthed]=useState(false);
   const [pwErr,setPwErr]=useState(false);
   const [view,setView]=useState("home");
-  const [members,setMembers]=useState(MEM0);
-  const [noms,setNoms]=useState(NOMS0);
+  const [members,setMembers]=useState(MEM_DEFAULT);
+  const [noms,setNoms]=useState(NOMS_DEFAULT);
   const [adminOk,setAdminOk]=useState(false);
   const [pinErr,setPinErr]=useState(false);
   const [aTab,setATab]=useState("overview");
   const [toast,setToast]=useState(null);
   const [activeName,setActiveName]=useState("");
   const [mVotes,setMVotes]=useState([]);
-  const [pollVotes,setPollVotes]=useState({Thursday:[],Friday:[],Saturday:[],Sunday:[]});
+  const [pollVotes,setPollVotes]=useState(POLL_DEFAULT);
   const [hostAddr,setHostAddr]=useState("");
   const [showFood,setShowFood]=useState(false);
-  const [books,setBooks]=useState(PAST);
-  const [rot,setRot]=useState({currentHost:ROT.currentHost,currentPicker:ROT.currentPicker,nextHost:ROT.nextHost,nextPicker:ROT.nextPicker});
+  const [books,setBooks]=useState(PAST_DEFAULT);
+  const [rot,setRot]=useState(ROT_DEFAULT);
   const beltRef=useRef(null);
   const pwRef=useRef(null);
   const pinRef=useRef(null);
   const nomTitleRef=useRef(null);
   const nomAuthorRef=useRef(null);
   const nomByRef=useRef(null);
+  const stateRef=useRef({});
 
   const pop=m=>{setToast(m);setTimeout(()=>setToast(null),2600);};
+
+  // Keep stateRef in sync so onSave always has latest
+  useEffect(()=>{stateRef.current={members,noms,pollVotes,hostAddr,books,rot};},[members,noms,pollVotes,hostAddr,books,rot]);
+
+  // Load from JSONBin on mount
+  useEffect(()=>{
+    const ready = BIN_ID!=="YOUR_BIN_ID_HERE" && BIN_KEY!=="YOUR_API_KEY_HERE";
+    setBinReady(ready);
+    if(!ready){setLoading(false);return;}
+    loadData().then(data=>{
+      if(data){
+        if(data.members)setMembers(data.members);
+        if(data.noms)setNoms(data.noms);
+        if(data.pollVotes)setPollVotes(data.pollVotes);
+        if(data.hostAddr)setHostAddr(data.hostAddr);
+        if(data.books)setBooks(data.books);
+        if(data.rot)setRot(data.rot);
+      }
+      setLoading(false);
+    });
+  },[]);
+
+  // Merge partial updates and save
+  function onSave(patch){
+    if(!binReady)return;
+    const next={...stateRef.current,...patch};
+    saveData(next);
+  }
 
   function tryPw(){
     const val=pwRef.current?pwRef.current.value.toLowerCase().trim():"";
@@ -248,13 +334,19 @@ function App(){
     const a=nomAuthorRef.current?nomAuthorRef.current.value:"";
     const b=nomByRef.current?nomByRef.current.value:"";
     if(!t.trim()||!a.trim()){pop("Title & author required");return;}
-    setNoms(n=>[...n,{id:Date.now(),title:t,author:a,nominatedBy:b,votes:0}]);
+    const updated=[...noms,{id:Date.now(),title:t,author:a,nominatedBy:b,votes:0}];
+    setNoms(updated);
+    onSave({noms:updated});
     if(nomTitleRef.current)nomTitleRef.current.value="";
     if(nomAuthorRef.current)nomAuthorRef.current.value="";
     if(nomByRef.current)nomByRef.current.value="";
     pop("Nomination added!");
   }
-  const upvote=id=>setNoms(n=>n.map(x=>x.id===id?{...x,votes:x.votes+1}:x).sort((a,b)=>b.votes-a.votes));
+  function upvote(id){
+    const updated=noms.map(x=>x.id===id?{...x,votes:x.votes+1}:x).sort((a,b)=>b.votes-a.votes);
+    setNoms(updated);
+    onSave({noms:updated});
+  }
 
   useEffect(()=>{
     if(view!=="home")return;
@@ -294,6 +386,8 @@ function App(){
     </div>
   );
 
+  if(loading)return <Spinner/>;
+
   if(!authed) return(
     <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",padding:"20px"}}>
       <Toast/>
@@ -306,6 +400,7 @@ function App(){
           <div style={{fontSize:28,fontFamily:SERIF,fontStyle:"italic",color:T.blush}}>Who Read</div>
         </div>
         <div style={{fontSize:12,color:T.creamDim,marginTop:6,marginBottom:28,fontStyle:"italic"}}>dog-earing pages & taking names</div>
+        {!binReady&&<div style={{fontSize:11,color:T.gold,marginBottom:16,padding:"8px 12px",background:T.goldSoft,borderRadius:10,lineHeight:1.5}}>⚠️ Storage not connected — changes won't sync across devices yet. See Admin → Setup.</div>}
         <input ref={pwRef} style={{...inp,textAlign:"center",letterSpacing:3,marginBottom:10}} type="password" defaultValue="" onKeyDown={e=>e.key==="Enter"&&tryPw()} placeholder="enter password" autoComplete="off"/>
         {pwErr&&<div style={{color:T.pink,fontSize:13,marginBottom:10,fontWeight:600}}>Wrong password — try again</div>}
         <button onClick={tryPw} style={{...sl(T.blush),marginTop:4,fontSize:15,padding:"14px"}}>Enter</button>
@@ -316,7 +411,7 @@ function App(){
   if(view==="member") return(
     <div style={{background:T.bg,minHeight:"100vh",color:T.cream}}>
       <Toast/><BottomNav/>
-      <MemberPage members={members} setMembers={setMembers} pollVotes={pollVotes} setPollVotes={setPollVotes} pop={pop}/>
+      <MemberPage members={members} setMembers={setMembers} pollVotes={pollVotes} setPollVotes={setPollVotes} pop={pop} onSave={onSave}/>
     </div>
   );
 
@@ -372,7 +467,7 @@ function App(){
   );
 
   if(view==="admin"&&adminOk){
-    const tabs=["overview","members","rotation","books","address"];
+    const tabs=["overview","members","rotation","books","setup","address"];
     return(
       <div style={{background:T.bg,minHeight:"100vh",color:T.cream,paddingBottom:80}}>
         <Toast/><BottomNav/>
@@ -391,8 +486,8 @@ function App(){
             </div>
             <div style={crd()}>
               <div style={{fontSize:20,fontFamily:SERIF,color:T.cream,marginBottom:4}}>{BOOK.title}</div>
-              <div style={{fontSize:13,color:T.creamDim,marginBottom:12}}>Apr 1, 2026 · 6:00 PM · {rot.currentHost}</div>
-              <button onClick={()=>mkICS(hostAddr)} style={sl(T.blush)}>Download .ics</button>
+              <div style={{fontSize:13,color:T.creamDim,marginBottom:12}}>Apr 1, 2026 · 6:00 PM · {rot.currentHost||"Host TBD"}</div>
+              <button onClick={()=>mkICS(hostAddr,rot.currentHost)} style={sl(T.blush)}>Download .ics</button>
             </div>
           </>)}
           {aTab==="members"&&members.map((m,i)=>(
@@ -407,45 +502,28 @@ function App(){
           ))}
           {aTab==="rotation"&&(
             <div>
-              <div style={{fontSize:13,color:T.creamDim,marginBottom:14,lineHeight:1.6}}>
-                Assign host and book picker for this month and next. Host options are filtered to members who said they can host.
-              </div>
-              {[
-                ["currentHost","This month's host","April"],
-                ["currentPicker","This month's book picker","April"],
-                ["nextHost","Next month's host","May"],
-                ["nextPicker","Next month's book picker","May"],
-              ].map(([key,label,month])=>(
+              <div style={{fontSize:13,color:T.creamDim,marginBottom:14,lineHeight:1.6}}>Assign host and book picker. Host options show only members who said they can host.</div>
+              {[["currentHost","This month's host","April"],["currentPicker","This month's book picker","April"],["nextHost","Next month's host","May"],["nextPicker","Next month's book picker","May"]].map(([key,label,month])=>(
                 <div key={key} style={crd({padding:"14px"})}>
                   <label style={lbl}>{label} <span style={{color:T.blush}}>({month})</span></label>
-                  <select
-                    value={rot[key]||""}
-                    onChange={e=>setRot(prev=>({...prev,[key]:e.target.value}))}
-                    style={{...inp,background:"#fff"}}
-                  >
+                  <select value={rot[key]||""} onChange={e=>{const nr={...rot,[key]:e.target.value};setRot(nr);onSave({rot:nr});}} style={{...inp,background:"#fff"}}>
                     <option value="">— Not assigned —</option>
-                    {members
-                      .filter(m=>m.rsvp!=="paused"&&(key.includes("Host")?m.canHost:true))
-                      .map(m=><option key={m.id} value={m.name}>{m.name}{key.includes("Host")&&m.canHost?" ✓":""}</option>)
-                    }
+                    {members.filter(m=>m.rsvp!=="paused"&&(key.includes("Host")?m.canHost:true)).map(m=><option key={m.id} value={m.name}>{m.name}{key.includes("Host")&&m.canHost?" ✓":""}</option>)}
                   </select>
                   {rot[key]&&<div style={{fontSize:12,color:T.sage,marginTop:8}}>Assigned to {rot[key]}</div>}
                 </div>
               ))}
-              <button onClick={()=>pop("Rotation saved!")} style={sl(T.sage)}>Save rotation</button>
             </div>
           )}
           {aTab==="books"&&(
             <div>
-              <div style={{fontSize:13,color:T.creamDim,marginBottom:14,lineHeight:1.6}}>
-                Edit titles, authors, and cover image URLs. To find a cover URL: search on <strong style={{color:T.cream}}>Google Images</strong>, long-press → Copy image address.
-              </div>
+              <div style={{fontSize:13,color:T.creamDim,marginBottom:14,lineHeight:1.6}}>Edit titles, authors, and cover URLs. To find a cover: Google Images → long-press → Copy image address.</div>
               {books.map((b,i)=>(
                 <div key={i} style={crd({padding:"14px"})}>
-                  <div style={{display:"flex",gap:12,alignItems:"flex-start",marginBottom:10}}>
+                  <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
                     <CoverSpine title={b.title} col={b.col} txt={b.txt} coverUrl={b.coverUrl} w={44} h={64}/>
                     <div style={{flex:1,minWidth:0}}>
-                      <div style={{fontSize:12,color:T.creamDim,marginBottom:4}}><strong style={{color:T.cream}}>#{i+1}</strong></div>
+                      <div style={{fontSize:11,color:T.creamDim,marginBottom:6}}>#{i+1}</div>
                       <input style={{...inp,marginBottom:6,fontSize:13,padding:"8px 10px"}} value={b.title} onChange={e=>setBooks(prev=>prev.map((x,j)=>j===i?{...x,title:e.target.value}:x))} placeholder="Title"/>
                       <input style={{...inp,marginBottom:6,fontSize:13,padding:"8px 10px"}} value={b.author} onChange={e=>setBooks(prev=>prev.map((x,j)=>j===i?{...x,author:e.target.value}:x))} placeholder="Author"/>
                       <input style={{...inp,fontSize:12,padding:"8px 10px"}} value={b.coverUrl||""} onChange={e=>setBooks(prev=>prev.map((x,j)=>j===i?{...x,coverUrl:e.target.value}:x))} placeholder="Cover image URL"/>
@@ -453,14 +531,35 @@ function App(){
                   </div>
                 </div>
               ))}
-              <button onClick={()=>pop("Changes saved!")} style={sl(T.sage)}>Save all changes</button>
+              <button onClick={()=>{onSave({books});pop("Books saved!");}} style={sl(T.sage)}>Save all changes</button>
+            </div>
+          )}
+          {aTab==="setup"&&(
+            <div>
+              <div style={{fontSize:18,fontFamily:SERIF,color:T.cream,marginBottom:8}}>Connect Shared Storage</div>
+              <div style={{fontSize:13,color:T.creamDim,marginBottom:16,lineHeight:1.6}}>
+                To sync data across all devices, create a free account at <strong style={{color:T.cream}}>jsonbin.io</strong>:{"\n\n"}
+                1. Sign up free at jsonbin.io{"\n"}
+                2. Click <strong style={{color:T.cream}}>Create Bin</strong> → paste in <code style={{color:T.gold}}>{"{}"}</code> → Save{"\n"}
+                3. Copy the <strong style={{color:T.cream}}>Bin ID</strong> from the URL{"\n"}
+                4. Go to API Keys → copy your <strong style={{color:T.cream}}>Master Key</strong>{"\n"}
+                5. Paste both below and save — then update the code in GitHub with these values
+              </div>
+              <div style={crd()}>
+                <div style={{fontSize:11,color:binReady?T.sage:T.gold,fontWeight:700,marginBottom:12}}>{binReady?"✓ Storage connected":"⚠️ Not connected yet"}</div>
+                <label style={lbl}>Current Bin ID in code</label>
+                <div style={{fontSize:13,color:T.cream,background:T.bg3,padding:"10px",borderRadius:10,marginBottom:12,fontFamily:"monospace",wordBreak:"break-all"}}>{BIN_ID}</div>
+                <label style={lbl}>Current API Key in code</label>
+                <div style={{fontSize:13,color:T.cream,background:T.bg3,padding:"10px",borderRadius:10,fontFamily:"monospace",wordBreak:"break-all"}}>{BIN_KEY}</div>
+              </div>
+              <div style={{fontSize:12,color:T.creamDim,marginTop:8,lineHeight:1.6}}>Once you have your Bin ID and API Key, share them back here and I'll update the code for you.</div>
             </div>
           )}
           {aTab==="address"&&(
             <div style={crd()}>
               <label style={lbl}>Meeting address</label>
               <input style={{...inp,marginBottom:12}} value={hostAddr} onChange={e=>setHostAddr(e.target.value)} placeholder="123 Main St, City, State"/>
-              <button onClick={()=>pop("Saved!")} style={sl(T.blush)}>Save</button>
+              <button onClick={()=>{onSave({hostAddr});pop("Saved!");}} style={sl(T.blush)}>Save</button>
               {hostAddr&&<div style={{marginTop:10,fontSize:12,color:T.blush,padding:"10px",background:T.bg3,borderRadius:10}}>{hostAddr}</div>}
             </div>
           )}
@@ -488,9 +587,9 @@ function App(){
           ))}
         </div>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:24}}>
-          <button onClick={()=>mkICS(hostAddr)} style={{...sl(T.blush),padding:"11px 6px",fontSize:12,whiteSpace:"nowrap"}}>Calendar</button>
-          <a href={ZOOM} target="_blank" rel="noreferrer" style={{...sl(T.sky),padding:"11px 6px",fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",whiteSpace:"nowrap"}}>Zoom</a>
-          <a href={NOTES} target="_blank" rel="noreferrer" style={{...sl(T.sage),padding:"11px 6px",fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",whiteSpace:"nowrap"}}>Notes</a>
+          <button onClick={()=>mkICS(hostAddr,rot.currentHost)} style={{...sl(T.blush),padding:"11px 6px",fontSize:12}}>Calendar</button>
+          <a href={ZOOM} target="_blank" rel="noreferrer" style={{...sl(T.sky),padding:"11px 6px",fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center"}}>Zoom</a>
+          <a href={NOTES} target="_blank" rel="noreferrer" style={{...sl(T.sage),padding:"11px 6px",fontSize:12,textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center"}}>Notes</a>
         </div>
         <svg width="100%" height="20" viewBox="0 0 400 20" preserveAspectRatio="none" style={{display:"block",marginBottom:-1}}>
           <path d="M0,10 C80,18 160,2 240,10 C320,18 370,6 400,10 L400,20 L0,20 Z" fill={T.bg}/>
@@ -521,7 +620,11 @@ function App(){
                 <div key={day} onClick={()=>{
                   if(!activeName)return;
                   const already=(pollVotes[day]||[]).includes(mid);
-                  setPollVotes(v=>{const nv={...v};if(already)nv[day]=nv[day].filter(x=>x!==mid);else nv[day]=[...(nv[day]||[]),mid];return nv;});
+                  const nv={...pollVotes};
+                  if(already)nv[day]=nv[day].filter(x=>x!==mid);
+                  else nv[day]=[...(nv[day]||[]),mid];
+                  setPollVotes(nv);
+                  onSave({pollVotes:nv});
                   setMVotes(prev=>already?prev.filter(d=>d!==day):[...new Set([...prev,day])]);
                 }} style={{padding:"12px",borderRadius:12,border:"1.5px solid "+(myVote?T.blush:isTop&&canSee?T.gold:T.border),background:myVote?T.blushSoft:isTop&&canSee?T.goldSoft:T.bg3,cursor:activeName?"pointer":"default"}}>
                   <div style={{fontSize:13,fontWeight:600,color:myVote?T.blush:T.cream,fontFamily:SERIF}}>{day}</div>
@@ -533,7 +636,15 @@ function App(){
               );
             })}
           </div>
-          {activeName&&<button onClick={()=>{const mid=members.find(m=>m.name===activeName)?.id||activeName;setPollVotes(v=>{const nv={...v};Object.keys(nv).forEach(d=>{nv[d]=(nv[d]||[]).filter(x=>x!==mid);});return nv;});setMVotes(["cantmake"]);pop("Response recorded!");}} style={{...gh(T.creamDim),fontSize:13,padding:"10px"}}>Sorry — Can't make it!</button>}
+          {activeName&&<button onClick={()=>{
+            const mid=members.find(m=>m.name===activeName)?.id||activeName;
+            const nv={...pollVotes};
+            Object.keys(nv).forEach(d=>{nv[d]=(nv[d]||[]).filter(x=>x!==mid);});
+            setPollVotes(nv);
+            onSave({pollVotes:nv});
+            setMVotes(["cantmake"]);
+            pop("Response recorded!");
+          }} style={{...gh(T.creamDim),fontSize:13,padding:"10px"}}>Sorry — Can't make it!</button>}
         </div>
 
         <div style={crd()}>
