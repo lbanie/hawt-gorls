@@ -269,7 +269,7 @@ function App(){
   const [foodLoad,setFoodLoad]=useState(false);
   const [feed,setFeed]=useState(null);
   const [feedLoad,setFeedLoad]=useState(false);
-  const beltRef=useRef(null);
+  const pwRef = useRef(null);
   const pinRef=useRef(null);
   const nomTitleRef=useRef(null);
   const nomAuthorRef=useRef(null);
@@ -277,14 +277,14 @@ function App(){
 
   const pop=m=>{setToast(m);setTimeout(()=>setToast(null),2600);};
   function tryPw(){
-    const val = pw.toLowerCase().trim();
+    const val = pwRef.current ? pwRef.current.value.toLowerCase().trim() : "";
     if(val === GROUP_PW){
       setAuthed(true);
-      setPw("");
       setPwErr(false);
+      if(pwRef.current) pwRef.current.value = "";
     } else {
       setPwErr(true);
-      setPw("");
+      if(pwRef.current) pwRef.current.value = "";
     }
   }
   function tryAdmin(){const val=pinRef.current?pinRef.current.value:"";if(val==="1234"){setAdminOk(true);setView("admin");setPinErr(false);if(pinRef.current)pinRef.current.value="";}else{setPinErr(true);if(pinRef.current)pinRef.current.value="";}}
@@ -341,7 +341,7 @@ function App(){
         </div>
         <Wordmark large/>
         <div style={{fontSize:12,color:T.creamDim,marginTop:8,marginBottom:32,fontStyle:"italic"}}>dog-earing pages & taking names</div>
-        <input style={{...inp,textAlign:"center",letterSpacing:2,marginBottom:10,fontSize:15}} type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();tryPw();}}} placeholder="enter password"/>
+        <input ref={pwRef} style={{...inp,textAlign:"center",letterSpacing:2,marginBottom:10,fontSize:15}} type="password" defaultValue="" onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();tryPw();}}} placeholder="enter password"/>
         {pwErr&&<div style={{color:T.pink,fontSize:12,marginBottom:10,fontWeight:600}}>Wrong password — try again</div>}
         <button style={{...sl(T.blush),width:"100%",padding:"12px",fontSize:14}} onClick={e=>{e.preventDefault();tryPw();}}>Enter</button>
       </div>
