@@ -276,7 +276,17 @@ function App(){
   const nomByRef=useRef(null);
 
   const pop=m=>{setToast(m);setTimeout(()=>setToast(null),2600);};
-  function tryPw(){if(pw.toLowerCase().trim()===GROUP_PW){setAuthed(true);setPw("");setPwErr(false);}else{setPwErr(true);setPw("");}}
+  function tryPw(){
+    const val = pw.toLowerCase().trim();
+    if(val === GROUP_PW){
+      setAuthed(true);
+      setPw("");
+      setPwErr(false);
+    } else {
+      setPwErr(true);
+      setPw("");
+    }
+  }
   function tryAdmin(){const val=pinRef.current?pinRef.current.value:"";if(val==="1234"){setAdminOk(true);setView("admin");setPinErr(false);if(pinRef.current)pinRef.current.value="";}else{setPinErr(true);if(pinRef.current)pinRef.current.value="";}}
   function addNom(){const t=nomTitleRef.current?nomTitleRef.current.value:"";const a=nomAuthorRef.current?nomAuthorRef.current.value:"";const b=nomByRef.current?nomByRef.current.value:"";if(!t.trim()||!a.trim()){pop("Title & author required");return;}setNoms(n=>[...n,{id:Date.now(),title:t,author:a,nominatedBy:b,votes:0}]);if(nomTitleRef.current)nomTitleRef.current.value="";if(nomAuthorRef.current)nomAuthorRef.current.value="";if(nomByRef.current)nomByRef.current.value="";pop("Nomination added!");}
   const upvote=id=>setNoms(n=>n.map(x=>x.id===id?{...x,votes:x.votes+1}:x).sort((a,b)=>b.votes-a.votes));
@@ -331,9 +341,9 @@ function App(){
         </div>
         <Wordmark large/>
         <div style={{fontSize:12,color:T.creamDim,marginTop:8,marginBottom:32,fontStyle:"italic"}}>dog-earing pages & taking names</div>
-        <input style={{...inp,textAlign:"center",letterSpacing:2,marginBottom:10,fontSize:15}} type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>e.key==="Enter"&&tryPw()} placeholder="enter password"/>
+        <input style={{...inp,textAlign:"center",letterSpacing:2,marginBottom:10,fontSize:15}} type="password" value={pw} onChange={e=>setPw(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();tryPw();}}} placeholder="enter password"/>
         {pwErr&&<div style={{color:T.pink,fontSize:12,marginBottom:10,fontWeight:600}}>Wrong password — try again</div>}
-        <button style={{...sl(T.blush),width:"100%",padding:"12px",fontSize:14}} onClick={tryPw}>Enter</button>
+        <button style={{...sl(T.blush),width:"100%",padding:"12px",fontSize:14}} onClick={e=>{e.preventDefault();tryPw();}}>Enter</button>
       </div>
     </div>
   );
