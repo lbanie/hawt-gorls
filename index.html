@@ -1,69 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hawt Gorls Who Read</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;}
-    body{background:#152B20;font-family:'DM Sans',system-ui,sans-serif;}
-    select option{background:#234532;color:#F2EDE3;}
-    ::-webkit-scrollbar{width:4px;height:4px;}
-    ::-webkit-scrollbar-track{background:transparent;}
-    ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px;}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Hawt Gorls Who Read</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#152B20;font-family:'DM Sans',system-ui,sans-serif}
+select option{background:#234532;color:#F2EDE3}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script type="text/babel" data-presets="react">
-const{useState,useEffect,useRef}=React;
+<div id="root"></div>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.23.2/babel.min.js"></script>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+// ── CONFIG — update these each month ──────────────────────────────────
+const GROUP_PW = "hawt1";
+
+const BOOK = {
+  title:"Martyr!", author:"Kaveh Akbar",
+  genre:"Literary Fiction", setting:"New York City / Iran",
+  spineColor:"#7B1F2E", spineText:"#F5D080"
+};
+
+const ROT = {
+  currentHost:"Athena Levitch", currentPicker:"Laylee Banie",
+  nextHost:"Erinne Davey", nextPicker:"Tyler Hill"
+};
+
+const POLL_OPTS = [
+  {day:"Thursday",date:"May 7"},{day:"Friday",date:"May 8"},
+  {day:"Saturday",date:"May 9"},{day:"Sunday",date:"May 10"}
+];
+
+const HARDCODED_FOOD = {
+  bookTheme:"Persian and New York-inspired bites to match the world of Martyr! — warm, literary, and a little melancholy.",
+  hostMain:[
+    {name:"Ghormeh sabzi (Persian herb stew)",desc:"Slow-cooked Iranian classic with herbs, kidney beans and lamb.",bookTie:"The soul food of Cyrus's Iranian heritage throughout the novel."},
+    {name:"Mast-o-khiar (yogurt & cucumber dip)",desc:"Creamy strained yogurt with cucumber, dried rose petals and mint. Serve with warm flatbread.",bookTie:"A nod to Kaveh Akbar's Iranian-American roots."},
+    {name:"New York-style charcuterie board",desc:"Cured meats, aged cheeses, cornichons, mustard and crackers."}
+  ],
+  guestBrings:[
+    {name:"Baklava or Persian pastries",desc:"Pick up from a Middle Eastern bakery — easy to share."},
+    {name:"Sparkling water or mocktail mixers",desc:"Light, inclusive and allergy-safe."},
+    {name:"Hummus and pita chips",desc:"Store-bought is fine. Nut-free and dairy-free."},
+    {name:"Fresh fruit platter",desc:"Grapes, melon, berries — naturally allergen-friendly."}
+  ],
+  drinks:[
+    {name:"Persian tea (chai)",desc:"Strong black tea in glasses with sugar cubes."},
+    {name:"Pomegranate spritz",desc:"Pomegranate juice, sparkling water and lime. No alcohol."},
+    {name:"Wine or sparkling wine",desc:"A bottle of red or rosé for those who drink."}
+  ]
+};
+
+const HARDCODED_FEED = {items:[
+  {title:"The Familiar",author:"Leigh Bardugo",tag:"New Release",blurb:"Dark historical fantasy set in 15th-century Spain.",source:"The New York Times"},
+  {title:"James",author:"Percival Everett",tag:"Award Winner",blurb:"Pulitzer-winning reimagining of Huckleberry Finn.",source:"The Guardian"},
+  {title:"All Fours",author:"Miranda July",tag:"Buzzy Read",blurb:"Wildly original midlife novel everyone is talking about.",source:"NPR Books"},
+  {title:"The Women",author:"Kristin Hannah",tag:"Book Club Pick",blurb:"Epic saga of female nurses in Vietnam — instant classic.",source:"Oprah Daily"},
+  {title:"Intermezzo",author:"Sally Rooney",tag:"Critic's Darling",blurb:"Rooney's most mature novel yet — grief and complicated love.",source:"Vulture"},
+  {title:"The God of the Woods",author:"Liz Moore",tag:"Book Club Pick",blurb:"A missing girl, a summer camp, decades of family secrets.",source:"TIME Magazine"},
+  {title:"The Correspondent",author:"Virginia Evans",tag:"Debut Novel",blurb:"Epistolary debut hailed by Ann Patchett as a revelation.",source:"The Atlantic"},
+  {title:"Martyr!",author:"Kaveh Akbar",tag:"Critic's Darling",blurb:"Incandescent debut — addiction, grief and meaning.",source:"The New York Times"}
+]};
+// ── END CONFIG ────────────────────────────────────────────────────────
 
 const T={bg:"#152B20",bg2:"#1C3829",bg3:"#234532",bg4:"#2A5240",card:"#1E3D2C",cream:"#F2EDE3",creamMid:"#C8BFA8",creamDim:"#8A8070",blush:"#E8A0A8",blushSoft:"rgba(232,160,168,0.14)",pink:"#D4607A",pinkSoft:"rgba(212,96,122,0.14)",gold:"#D4A84A",goldSoft:"rgba(212,168,74,0.14)",sage:"#6AAA84",sageSoft:"rgba(106,170,132,0.14)",sky:"#70B8CC",skySoft:"rgba(112,184,204,0.14)",border:"rgba(255,255,255,0.08)",borderMed:"rgba(255,255,255,0.16)"};
 const SERIF="Georgia,'Times New Roman',serif";
 const SANS="'DM Sans',system-ui,sans-serif";
 const ZOOM="https://us05web.zoom.us/j/83873906720?pwd=03Q9be6hK9Vr4OdFXTmVCfQ8v86KWV.1";
 const NOTES="https://www.icloud.com/notes/02539w5ZpE0nKd4aZd39sVSNQ#HAWT_GORLZ_WHO_READ";
-const API_KEY="";
 
-const HARDCODED_FOOD={
-  bookTheme:"Persian and New York-inspired bites to match the world of Martyr! — warm, literary, and a little melancholy.",
-  hostMain:[
-    {name:"Ghormeh sabzi (Persian herb stew)",desc:"A slow-cooked Iranian classic with herbs, kidney beans and lamb. Rich, fragrant and deeply comforting.",bookTie:"The soul food of Cyrus's Iranian heritage throughout the novel."},
-    {name:"Mast-o-khiar (yogurt & cucumber dip)",desc:"Creamy strained yogurt with cucumber, dried rose petals and mint. Serve with warm flatbread.",bookTie:"A nod to Kaveh Akbar's Iranian-American roots."},
-    {name:"New York-style charcuterie board",desc:"Cured meats, aged cheeses, cornichons, mustard, crackers and seasonal fruit. Easy to assemble, crowd-pleasing."},
-  ],
-  guestBrings:[
-    {name:"Baklava or Persian pastries",desc:"Pick up from a Middle Eastern bakery — individually wrapped and easy to share."},
-    {name:"Sparkling water or non-alcoholic drinks",desc:"Canned sparkling water, juices or mocktail mixers. Light and inclusive."},
-    {name:"Hummus and pita chips",desc:"Store-bought is totally fine. Great for grazing and nut-free, dairy-free."},
-    {name:"Fresh fruit platter",desc:"Grapes, strawberries, melon — naturally free of most allergens and refreshing."},
-  ],
-  drinks:[
-    {name:"Persian tea (chai)",desc:"Strong black tea served in glasses with sugar cubes. Authentic and warming."},
-    {name:"Pomegranate spritz",desc:"Pomegranate juice, sparkling water and a squeeze of lime. Beautiful colour, no alcohol."},
-    {name:"Wine or sparkling wine",desc:"A bottle of red or rosé for those who drink. Let guests bring their preference."},
-  ],
-};
-
-const HARDCODED_FEED={items:[
-  {title:"The Familiar",author:"Leigh Bardugo",tag:"New Release",blurb:"A dark, gripping historical fantasy set in 15th-century Spain.",source:"The New York Times"},
-  {title:"James",author:"Percival Everett",tag:"Award Winner",blurb:"A stunning reimagining of Huckleberry Finn that won the Pulitzer.",source:"The Guardian"},
-  {title:"All Fours",author:"Miranda July",tag:"Buzzy Read",blurb:"Wildly original midlife crisis novel that everyone is talking about.",source:"NPR Books"},
-  {title:"The Women",author:"Kristin Hannah",tag:"Book Club Pick",blurb:"Epic saga of female nurses in Vietnam — an instant classic.",source:"Oprah Daily"},
-  {title:"Intermezzo",author:"Sally Rooney",tag:"Critic's Darling",blurb:"Rooney's most mature novel yet — grief, chess and complicated love.",source:"Vulture"},
-  {title:"The God of the Woods",author:"Liz Moore",tag:"Book Club Pick",blurb:"A missing girl, a summer camp, decades of family secrets unraveling.",source:"TIME Magazine"},
-  {title:"The Correspondence",author:"J.M. Ledgard",tag:"Debut Novel",blurb:"Epistolary, haunting and unlike anything published this year.",source:"The Atlantic"},
-  {title:"Martyr!",author:"Kaveh Akbar",tag:"Critic's Darling",blurb:"Incandescent debut — addiction, grief and the search for meaning.",source:"The New York Times"},
-]};
-const BOOK={title:"Martyr!",author:"Kaveh Akbar",genre:"Literary Fiction",setting:"New York City / Iran",themes:"Addiction, Identity, Grief",spineColor:"#7B1F2E",spineText:"#F5D080"};
 const SHELF=[{title:"The God of the Woods",genre:"Mystery",col:"#1C3A2A",txt:"#8AC8A0"},{title:"Atmosphere",genre:"Literary Fiction",col:"#1A2840",txt:"#88B8D0"},{title:"The Correspondent",genre:"Epistolary",col:"#2A1A38",txt:"#B8A0D0"},{title:"All Fours",genre:"Literary",col:"#3A2010",txt:"#D4A870"}];
-const ROT={currentHost:"Athena Levitch",currentPicker:"Laylee Banie",nextHost:"Erinne Davey",nextPicker:"Tyler Hill"};
-const POLL_OPTS=[{day:"Thursday",date:"May 7"},{day:"Friday",date:"May 8"},{day:"Saturday",date:"May 9"},{day:"Sunday",date:"May 10"}];
 const PAST=[{title:"Intermezzo",author:"Sally Rooney",col:"#1C2B3A",txt:"#7BAFD4",isbn:"9780374614997"},{title:"All the Colors of the Dark",author:"Chris Whitaker",col:"#2A1A0E",txt:"#D4956A",isbn:"9780593597736"},{title:"Wedding People",author:"Alison Espach",col:"#3A1A2A",txt:"#D47BAF",isbn:"9781250284419"},{title:"The Women",author:"Kristin Hannah",col:"#1A2E1E",txt:"#7DC49A",isbn:"9781250301697"},{title:"The Very Secret Society of Irregular Witches",author:"Sangu Mandanna",col:"#2A1E3A",txt:"#A899D8",isbn:"9780593437889"},{title:"A Great Big Beautiful Life",author:"Emily Henry",col:"#3A2A0E",txt:"#E2B24A",isbn:"9780593441978"},{title:"Atmosphere",author:"Taylor Jenkins Reid",col:"#0E1E2E",txt:"#70C8DC",isbn:"9780593874936"},{title:"The God of the Woods",author:"Liz Moore",col:"#0E2218",txt:"#4ABA74",isbn:"9780593534151"},{title:"I Who Have Never Known Men",author:"Jacqueline Harpman",col:"#2E1A1A",txt:"#E87070",isbn:"9781913547912"},{title:"Margo's Got Money Troubles",author:"Rufi Thorpe",col:"#2A2A0E",txt:"#C8B84A",isbn:"9780593472439"},{title:"The Correspondent",author:"Virginia Evans",col:"#1A1A2E",txt:"#A899D8",isbn:"9780593798430"},{title:"Dear Debbie",author:"Freida McFadden",col:"#2E0E1A",txt:"#E8879A",isbn:"9781464249624"}];
 const NOMS0=[{id:1,title:"My Year of Rest and Relaxation",author:"Ottessa Moshfegh",nominatedBy:"Kayla",votes:3},{id:2,title:"Intermezzo",author:"Sally Rooney",nominatedBy:"Christie",votes:5},{id:3,title:"All Fours",author:"Miranda July",nominatedBy:"Danielle",votes:2},{id:4,title:"The Vegetarian",author:"Han Kang",nominatedBy:"Natalie",votes:4}];
 const MEM0=[
@@ -81,7 +96,7 @@ const MEM0=[
   {id:12,name:"Kacy Trumbo",allergies:"",dietary:"",canHost:false,bringing:"",rsvp:"",virtual:true,address:"",pickedThisYear:false},
 ];
 const TAG_COLS={"New Release":["#E8A0A8","rgba(232,160,168,0.14)"],"Book Club Pick":["#6AAA84","rgba(106,170,132,0.14)"],"Critic's Darling":["#D4A84A","rgba(212,168,74,0.14)"],"Debut Novel":["#70B8CC","rgba(112,184,204,0.14)"],"Buzzy Read":["#D4607A","rgba(212,96,122,0.14)"],"Award Winner":["#D4A84A","rgba(212,168,74,0.14)"]};
-const gbCover=isbn=>`https://books.google.com/books/content?vid=ISBN${isbn}&printsec=frontcover&img=1&zoom=2`;
+const gbCover = isbn => `https://books.google.com/books/content?vid=ISBN${isbn}&printsec=frontcover&img=1&zoom=2`;
 
 const ini=n=>n.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
 const AC=[T.blush,T.gold,T.sage,T.sky,T.pink,"#A899D8"];
@@ -98,14 +113,19 @@ const NB={background:"#fff",border:"1px solid rgba(0,0,0,0.12)",borderRadius:8,p
 
 function mkICS(hostAddr){
   const loc=hostAddr||ROT.currentHost+"'s place";
-  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//HawtGorlsWhoRead//EN","BEGIN:VEVENT","SUMMARY:Hawt Gorls Who Read - "+BOOK.title,"DESCRIPTION:Book: "+BOOK.title+" by "+BOOK.author+"\\nHost: "+ROT.currentHost+"\\nZoom: "+ZOOM,"DTSTART;TZID=America/New_York:20260401T180000","DTEND;TZID=America/New_York:20260401T200000","LOCATION:"+loc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
+  const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//HawtGorlsWhoRead//EN","BEGIN:VEVENT",
+    "SUMMARY:Hawt Gorls Who Read - "+BOOK.title,
+    "DESCRIPTION:Book: "+BOOK.title+" by "+BOOK.author+"\\nHost: "+ROT.currentHost+"\\nZoom: "+ZOOM,
+    "DTSTART;TZID=America/New_York:20260401T180000",
+    "DTEND;TZID=America/New_York:20260401T200000",
+    "LOCATION:"+loc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));
   a.download="bookclub.ics";a.click();
 }
 
 function Spine({title,genre,col,txt,w,h,cur}){
-  return(
+  return (
     <div style={{width:w||44,height:h||130,borderRadius:"5px 5px 4px 4px",background:col,position:"relative",overflow:"hidden",boxShadow:cur?"0 6px 24px rgba(0,0,0,.6)":"2px 4px 12px rgba(0,0,0,.5)",flexShrink:0}}>
       <div style={{position:"absolute",left:0,top:0,bottom:0,width:6,background:"rgba(0,0,0,.25)"}}/>
       <div style={{position:"absolute",top:0,left:6,right:0,height:3,background:"rgba(255,255,255,.12)"}}/>
@@ -114,22 +134,23 @@ function Spine({title,genre,col,txt,w,h,cur}){
       <div style={{position:"absolute",bottom:14,left:10,right:6,height:1,background:txt+"44"}}/>
       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6,paddingLeft:8,paddingRight:4}}>
         <div style={{fontSize:cur?9:7.5,fontWeight:700,color:txt,textAlign:"center",lineHeight:1.35,fontFamily:SERIF,wordBreak:"break-word"}}>{title}</div>
-        {genre?<div style={{fontSize:6,color:txt,opacity:.65,textAlign:"center",letterSpacing:.5,textTransform:"uppercase",fontFamily:SANS}}>{genre}</div>:null}
+        {genre&&<div style={{fontSize:6,color:txt,opacity:.65,textAlign:"center",letterSpacing:.5,textTransform:"uppercase",fontFamily:SANS}}>{genre}</div>}
       </div>
-      {cur?<div style={{position:"absolute",top:24,left:8,right:4,textAlign:"center"}}><div style={{fontSize:5.5,fontWeight:700,color:txt,opacity:.8,letterSpacing:.8,textTransform:"uppercase"}}>now reading</div></div>:null}
+      {cur&&<div style={{position:"absolute",top:24,left:8,right:4,textAlign:"center"}}><div style={{fontSize:5.5,fontWeight:700,color:txt,opacity:.8,letterSpacing:.8,textTransform:"uppercase"}}>now reading</div></div>}
     </div>
   );
 }
 
-function CoverSpine({title,author,col,txt,isbn,w,h}){
-  const[err,setErr]=useState(false);
-  return(
+function CoverSpine({title,col,txt,isbn,w,h}){
+  const [err,setErr]=useState(false);
+  return (
     <div style={{width:w||70,height:h||106,borderRadius:6,overflow:"hidden",boxShadow:"2px 3px 10px rgba(0,0,0,.5)",flexShrink:0,background:col}}>
       {!err
-        ?<img src={gbCover(isbn)} alt={title} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={()=>setErr(true)}/>
-        :<div style={{width:"100%",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:6,borderLeft:"3px solid "+txt+"55"}}>
-          <div style={{fontSize:7.5,fontWeight:700,color:txt,textAlign:"center",lineHeight:1.35,fontFamily:SERIF,wordBreak:"break-word"}}>{title}</div>
-        </div>}
+        ? <img src={gbCover(isbn)} alt={title} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}} onError={()=>setErr(true)}/>
+        : <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",padding:6,borderLeft:"3px solid "+txt+"55"}}>
+            <div style={{fontSize:7.5,fontWeight:700,color:txt,textAlign:"center",lineHeight:1.35,fontFamily:SERIF,wordBreak:"break-word"}}>{title}</div>
+          </div>
+      }
     </div>
   );
 }
@@ -140,69 +161,84 @@ function Av({name,size,idx}){
 }
 
 function MemberPage({members,setMembers,pollVotes,setPollVotes,pop}){
-  const[name,setName]=useState("");
-  const[bringing,setBringing]=useState("");
-  const[address,setAddress]=useState("");
+  const [name,setName]=useState("");
+  const [bringing,setBringing]=useState("");
+  const [address,setAddress]=useState("");
   const m=members.find(x=>x.name===name)||null;
+
   function handleSelect(e){
-    const n=e.target.value;setName(n);
+    const n=e.target.value; setName(n);
     const f=members.find(x=>x.name===n);
-    setBringing(f?f.bringing||"":"");setAddress(f?f.address||"":"");
+    setBringing(f?f.bringing||"":""); setAddress(f?f.address||"":"");
   }
   function save(patch){if(!m){pop("Select your name first");return;}setMembers(prev=>prev.map(x=>x.id===m.id?{...x,...patch}:x));pop("Saved!");}
   function togglePollDay(day){if(!m){pop("Select your name first");return;}setPollVotes(prev=>{const nv={...prev};const already=(nv[day]||[]).includes(m.id);nv[day]=already?nv[day].filter(x=>x!==m.id):[...(nv[day]||[]),m.id];return nv;});}
   function cantMakeIt(){if(!m){pop("Select your name first");return;}setPollVotes(prev=>{const nv={...prev};Object.keys(nv).forEach(d=>{nv[d]=(nv[d]||[]).filter(x=>x!==m.id);});return nv;});pop("Response recorded!");}
+
   const voted=m?Object.values(pollVotes).flat().includes(m.id):false;
-  const StatusPill=({done})=>done?<span style={pl(T.sage,T.sageSoft)}>Done</span>:<span style={pl(T.blush,T.blushSoft)}>Pending</span>;
-  const cardS=(done)=>({...crd(),borderLeft:done?"3px solid "+T.sage:"3px solid "+T.blush});
-  return(
+  const SP=({done})=>done?<span style={pl(T.sage,T.sageSoft)}>Done</span>:<span style={pl(T.blush,T.blushSoft)}>Pending</span>;
+  const cs=(done)=>({...crd(),borderLeft:done?"3px solid "+T.sage:"3px solid "+T.blush});
+
+  return (
     <div style={{maxWidth:580,margin:"0 auto",padding:"32px 20px 56px"}}>
       <div style={{fontSize:30,fontFamily:SERIF,color:T.cream,letterSpacing:-.6,marginBottom:20}}>My Profile & Tasks</div>
       <div style={crd()}>
         <div style={{fontSize:13,fontWeight:700,color:T.cream,marginBottom:10}}>Your name</div>
-        <select value={name} onChange={handleSelect} style={{...inp}}>
+        <select value={name} onChange={handleSelect} style={inp}>
           <option value="">— Select your name —</option>
           {members.filter(x=>x.rsvp!=="paused").map(x=><option key={x.id} value={x.name}>{x.name}</option>)}
         </select>
         {name&&<div style={{fontSize:12,color:T.creamDim,marginTop:8,fontStyle:"italic"}}>Logged in as {name}</div>}
       </div>
       {m&&<>
-        <div style={cardS(!!m.rsvp)}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}><div style={{fontSize:13,fontWeight:700,color:T.cream}}>RSVP for April</div><StatusPill done={!!m.rsvp}/></div>
+        <div style={cs(!!m.rsvp)}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.cream}}>RSVP for April</div><SP done={!!m.rsvp}/>
+          </div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
             {[["yes","Going"],["maybe","Maybe"],["no","Can't go"],["cantmake","Sorry — Can't make it!"]].map(([v,l])=>(
               <button key={v} onClick={()=>save({rsvp:v})} style={{padding:"9px 8px",borderRadius:10,border:"1px solid "+(m.rsvp===v?T.blush:T.borderMed),background:m.rsvp===v?T.blushSoft:"transparent",color:m.rsvp===v?T.blush:T.creamDim,fontSize:12,fontWeight:m.rsvp===v?700:400,cursor:"pointer",fontFamily:SANS,gridColumn:v==="cantmake"?"1/-1":"auto"}}>{l}</button>
             ))}
           </div>
         </div>
-        <div style={cardS(voted)}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><div style={{fontSize:13,fontWeight:700,color:T.cream}}>Vote on the May meeting day</div><StatusPill done={voted}/></div>
+        <div style={cs(voted)}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.cream}}>Vote on the May meeting day</div><SP done={voted}/>
+          </div>
           <div style={{fontSize:11,color:T.creamDim,marginBottom:12}}>First full week of May — select all days that work!</div>
           <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
             {POLL_OPTS.map(({day,date})=>{
               const myVote=(pollVotes[day]||[]).includes(m.id);
-              return(<button key={day} onClick={()=>togglePollDay(day)} style={{padding:"10px 12px",borderRadius:10,border:"1.5px solid "+(myVote?T.blush:T.borderMed),background:myVote?T.blushSoft:T.bg3,cursor:"pointer",textAlign:"left",fontFamily:SANS,width:"100%"}}>
-                <div style={{fontSize:12,fontWeight:600,color:myVote?T.blush:T.cream,fontFamily:SERIF}}>{day}</div>
-                <div style={{fontSize:10,color:T.creamDim}}>{date}</div>
-                {myVote&&<div style={{fontSize:9,color:T.blush,fontWeight:700,marginTop:3,textTransform:"uppercase"}}>Selected</div>}
-              </button>);
+              return (
+                <button key={day} onClick={()=>togglePollDay(day)} style={{padding:"10px 12px",borderRadius:10,border:"1.5px solid "+(myVote?T.blush:T.borderMed),background:myVote?T.blushSoft:T.bg3,cursor:"pointer",textAlign:"left",fontFamily:SANS,width:"100%"}}>
+                  <div style={{fontSize:12,fontWeight:600,color:myVote?T.blush:T.cream,fontFamily:SERIF}}>{day}</div>
+                  <div style={{fontSize:10,color:T.creamDim}}>{date}</div>
+                  {myVote&&<div style={{fontSize:9,color:T.blush,fontWeight:700,marginTop:3,textTransform:"uppercase"}}>Selected</div>}
+                </button>
+              );
             })}
           </div>
           <button onClick={cantMakeIt} style={{...gh(T.creamDim),width:"100%",marginTop:10,fontSize:12,borderRadius:10,padding:"8px"}}>Sorry — Can't make it!</button>
         </div>
-        <div style={cardS(!!m.bringing)}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}><div style={{fontSize:13,fontWeight:700,color:T.cream}}>What are you bringing?</div><StatusPill done={!!m.bringing}/></div>
+        <div style={cs(!!m.bringing)}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.cream}}>What are you bringing?</div><SP done={!!m.bringing}/>
+          </div>
           <input style={{...inp,marginBottom:10}} value={bringing} onChange={e=>setBringing(e.target.value)} placeholder="e.g. wine, chips, sparkling water"/>
           <button onClick={()=>save({bringing})} style={{...sl(T.blush),width:"100%"}}>Save</button>
         </div>
-        <div style={cardS(!!m.address)}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}><div style={{fontSize:13,fontWeight:700,color:T.cream}}>Your home address</div><StatusPill done={!!m.address}/></div>
+        <div style={cs(!!m.address)}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.cream}}>Your home address</div><SP done={!!m.address}/>
+          </div>
           <div style={{fontSize:11,color:T.creamDim,marginBottom:10}}>For future hosting months — visible to admin only.</div>
           <input style={{...inp,marginBottom:10}} value={address} onChange={e=>setAddress(e.target.value)} placeholder="123 Main St, City, State"/>
           <button onClick={()=>save({address})} style={{...sl(T.blush),width:"100%"}}>Save</button>
         </div>
-        <div style={cardS(m.canHost===true||m.canHost===false)}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}><div style={{fontSize:13,fontWeight:700,color:T.cream}}>Available to host next month?</div><StatusPill done={m.canHost===true||m.canHost===false}/></div>
+        <div style={cs(m.canHost===true||m.canHost===false)}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.cream}}>Available to host next month?</div><SP done={m.canHost===true||m.canHost===false}/>
+          </div>
           <div style={{fontSize:11,color:T.creamDim,marginBottom:12}}>Can you host in May?</div>
           <div style={{display:"flex",gap:8}}>
             <button onClick={()=>save({canHost:true})} style={{flex:1,padding:"9px 8px",borderRadius:10,border:"1px solid "+(m.canHost===true?T.sage:T.borderMed),background:m.canHost===true?T.sageSoft:"transparent",color:m.canHost===true?T.sage:T.creamDim,fontSize:12,fontWeight:m.canHost===true?700:400,cursor:"pointer",fontFamily:SANS}}>Yes, I can host</button>
@@ -215,24 +251,24 @@ function MemberPage({members,setMembers,pollVotes,setPollVotes,pop}){
 }
 
 function App(){
-  const[authed,setAuthed]=useState(false);
-  const[pw,setPw]=useState("");
-  const[pwErr,setPwErr]=useState(false);
-  const[view,setView]=useState("home");
-  const[members,setMembers]=useState(MEM0);
-  const[noms,setNoms]=useState(NOMS0);
-  const[adminOk,setAdminOk]=useState(false);
-  const[pinErr,setPinErr]=useState(false);
-  const[aTab,setATab]=useState("overview");
-  const[toast,setToast]=useState(null);
-  const[activeName,setActiveName]=useState("");
-  const[mVotes,setMVotes]=useState([]);
-  const[pollVotes,setPollVotes]=useState({Thursday:[],Friday:[],Saturday:[],Sunday:[]});
-  const[hostAddr,setHostAddr]=useState("");
-  const[food,setFood]=useState(null);
-  const[foodLoad,setFoodLoad]=useState(false);
-  const[feed,setFeed]=useState(null);
-  const[feedLoad,setFeedLoad]=useState(false);
+  const [authed,setAuthed]=useState(false);
+  const [pw,setPw]=useState("");
+  const [pwErr,setPwErr]=useState(false);
+  const [view,setView]=useState("home");
+  const [members,setMembers]=useState(MEM0);
+  const [noms,setNoms]=useState(NOMS0);
+  const [adminOk,setAdminOk]=useState(false);
+  const [pinErr,setPinErr]=useState(false);
+  const [aTab,setATab]=useState("overview");
+  const [toast,setToast]=useState(null);
+  const [activeName,setActiveName]=useState("");
+  const [mVotes,setMVotes]=useState([]);
+  const [pollVotes,setPollVotes]=useState({Thursday:[],Friday:[],Saturday:[],Sunday:[]});
+  const [hostAddr,setHostAddr]=useState("");
+  const [food,setFood]=useState(null);
+  const [foodLoad,setFoodLoad]=useState(false);
+  const [feed,setFeed]=useState(null);
+  const [feedLoad,setFeedLoad]=useState(false);
   const beltRef=useRef(null);
   const pinRef=useRef(null);
   const nomTitleRef=useRef(null);
@@ -245,20 +281,8 @@ function App(){
   function addNom(){const t=nomTitleRef.current?nomTitleRef.current.value:"";const a=nomAuthorRef.current?nomAuthorRef.current.value:"";const b=nomByRef.current?nomByRef.current.value:"";if(!t.trim()||!a.trim()){pop("Title & author required");return;}setNoms(n=>[...n,{id:Date.now(),title:t,author:a,nominatedBy:b,votes:0}]);if(nomTitleRef.current)nomTitleRef.current.value="";if(nomAuthorRef.current)nomAuthorRef.current.value="";if(nomByRef.current)nomByRef.current.value="";pop("Nomination added!");}
   const upvote=id=>setNoms(n=>n.map(x=>x.id===id?{...x,votes:x.votes+1}:x).sort((a,b)=>b.votes-a.votes));
   function doShare(){const u=window.location.href;if(navigator.share)navigator.share({title:"Hawt Gorls Who Read",url:u});else if(navigator.clipboard){navigator.clipboard.writeText(u);pop("Link copied!");}}
-
-  async function loadFeed(){
-    setFeedLoad(true);
-    await new Promise(r=>setTimeout(r,600));
-    setFeed(HARDCODED_FEED);
-    setFeedLoad(false);
-  }
-
-  async function loadFood(){
-    setFoodLoad(true);
-    await new Promise(r=>setTimeout(r,600));
-    setFood(HARDCODED_FOOD);
-    setFoodLoad(false);
-  }
+  async function loadFeed(){setFeedLoad(true);await new Promise(r=>setTimeout(r,500));setFeed(HARDCODED_FEED);setFeedLoad(false);}
+  async function loadFood(){setFoodLoad(true);await new Promise(r=>setTimeout(r,500));setFood(HARDCODED_FOOD);setFoodLoad(false);}
 
   useEffect(()=>{loadFeed();},[]);
   useEffect(()=>{
@@ -269,7 +293,7 @@ function App(){
     raf=requestAnimationFrame(tick);return()=>cancelAnimationFrame(raf);
   },[view]);
 
-  const Toast=()=>toast?<div style={{position:"fixed",top:18,left:"50%",transform:"translateX(-50%)",background:T.sage,color:"#152B20",padding:"10px 22px",borderRadius:30,fontSize:13,fontWeight:700,zIndex:9999,fontFamily:SANS,whiteSpace:"nowrap",boxShadow:"0 4px 20px rgba(0,0,0,.3)"}}>{toast}</div>:null;
+  const Toast=()=>toast?<div style={{position:"fixed",top:18,left:"50%",transform:"translateX(-50%)",background:T.sage,color:"#152B20",padding:"10px 22px",borderRadius:30,fontSize:13,fontWeight:700,zIndex:9999,fontFamily:SANS,whiteSpace:"nowrap"}}>{toast}</div>:null;
   const Pill=({c,bg,ch})=><span style={pl(c,bg)}>{ch}</span>;
   const rsvpPill=r=>{if(!r)return null;const map={yes:[T.sage,T.sageSoft,"Going"],maybe:[T.gold,T.goldSoft,"Maybe"],no:[T.pink,T.pinkSoft,"Can't go"],cantmake:[T.blush,T.blushSoft,"Can't make it"],paused:["#A899D8","rgba(168,153,216,.14)","Paused"]};const[c,bg,l]=map[r]||map.no;return<Pill c={c} bg={bg} ch={l}/>;};
   const Wordmark=({large})=><div style={{lineHeight:1}}><span style={{fontSize:large?32:16,fontFamily:SERIF,fontWeight:400,color:T.cream,letterSpacing:-.5}}>Hawt Gorls </span><span style={{fontSize:large?32:16,fontFamily:SERIF,fontStyle:"italic",color:T.blush,letterSpacing:-.5}}>Who Read</span></div>;
@@ -299,7 +323,7 @@ function App(){
     </div>
   );
 
-  if(!authed) return(
+  if(!authed) return (
     <div style={{minHeight:"100vh",background:T.bg,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:SANS}}>
       <div style={{background:T.card,borderRadius:24,border:"1px solid "+T.border,padding:"44px 40px",maxWidth:380,width:"100%",textAlign:"center"}}>
         <div style={{marginBottom:24,display:"inline-flex",alignItems:"center",justifyContent:"center",width:64,height:64,borderRadius:16,background:"#fff",border:"1px solid "+T.borderMed}}>
@@ -314,14 +338,14 @@ function App(){
     </div>
   );
 
-  if(view==="member") return(
+  if(view==="member") return (
     <div style={{fontFamily:SANS,minHeight:"100vh",background:T.bg,color:T.cream}}>
       <Toast/><Nav/>
       <MemberPage members={members} setMembers={setMembers} pollVotes={pollVotes} setPollVotes={setPollVotes} pop={pop}/>
     </div>
   );
 
-  if(view==="nominations") return(
+  if(view==="nominations") return (
     <Page title="Book Nominations" sub="Upvote your picks for upcoming months">
       <div style={crd()}>
         <div style={{fontSize:16,fontFamily:SERIF,marginBottom:14,color:T.cream}}>Nominate a book</div>
@@ -340,18 +364,18 @@ function App(){
     </Page>
   );
 
-  if(view==="history") return(
+  if(view==="history") return (
     <Page title="Our Reading List">
       {PAST.map((b,i)=>(
         <div key={i} style={{...crd({padding:"14px 18px"}),display:"flex",alignItems:"center",gap:16}}>
-          <CoverSpine title={b.title} author={b.author} col={b.col} txt={b.txt} isbn={b.isbn} w={40} h={58}/>
+          <CoverSpine title={b.title} col={b.col} txt={b.txt} isbn={b.isbn} w={40} h={58}/>
           <div style={{flex:1}}><div style={{fontSize:15,fontFamily:SERIF,color:T.cream}}>{b.title}</div><div style={{fontSize:12,color:T.creamDim,fontStyle:"italic",marginTop:2}}>{b.author}</div></div>
         </div>
       ))}
     </Page>
   );
 
-  if(view==="pinPrompt") return(
+  if(view==="pinPrompt") return (
     <Page title="Admin">
       <div style={crd({maxWidth:300})}>
         <input ref={pinRef} style={{...inp,textAlign:"center",fontSize:20,letterSpacing:8,marginBottom:12}} type="password" defaultValue="" onKeyDown={e=>e.key==="Enter"&&tryAdmin()} placeholder="••••"/>
@@ -363,7 +387,7 @@ function App(){
 
   if(view==="admin"&&adminOk){
     const tabs=["overview","members","address","zoom"];
-    return(
+    return (
       <div style={{fontFamily:SANS,minHeight:"100vh",background:T.bg,color:T.cream,paddingBottom:56}}>
         <Toast/><Nav/>
         <div style={{background:T.bg2,borderBottom:"1px solid "+T.border,display:"flex",overflowX:"auto",paddingLeft:20}}>
@@ -421,7 +445,7 @@ function App(){
     );
   }
 
-  return(
+  return (
     <div style={{fontFamily:SANS,minHeight:"100vh",background:T.bg,color:T.cream}}>
       <Toast/><Nav/>
       <div style={{background:T.bg2,borderBottom:"1px solid "+T.border,padding:"40px 28px 0",overflow:"hidden",position:"relative"}}>
@@ -479,7 +503,7 @@ function App(){
                 const canSee=mVotes.length>0||!activeName;
                 const mid=members.find(m=>m.name===activeName)?.id||activeName;
                 const myVote=activeName&&vs.includes(mid);
-                return(
+                return (
                   <div key={day} onClick={()=>{
                     if(!activeName)return;
                     const already=(pollVotes[day]||[]).includes(mid);
@@ -532,10 +556,10 @@ function App(){
               <div style={{fontSize:12,color:T.creamDim,marginTop:4}}>Inspired by {BOOK.title} — allergy-aware.</div>
             </div>
             <button onClick={loadFood} style={{background:food?T.bg4:T.blush,color:food?T.creamMid:"#F2EDE3",border:food?"1px solid "+T.borderMed:"none",borderRadius:10,padding:"8px 16px",cursor:"pointer",fontSize:12,fontWeight:700,fontFamily:SANS,flexShrink:0}}>
-              {foodLoad?"Thinking…":food?"Refresh":"Generate suggestions"}
+              {foodLoad?"Loading…":food?"Refresh":"Generate suggestions"}
             </button>
           </div>
-          {foodLoad&&<div style={{fontSize:13,color:T.creamDim,fontStyle:"italic"}}>Cooking up ideas…</div>}
+          {foodLoad&&<div style={{fontSize:13,color:T.creamDim,fontStyle:"italic"}}>Loading suggestions…</div>}
           {food&&(
             <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:12}}>
               <div style={{background:T.bg3,borderRadius:12,padding:"14px 16px"}}>
@@ -565,8 +589,8 @@ function App(){
           {feed&&(
             <div style={{display:"flex",gap:12,overflowX:"auto",paddingBottom:8}}>
               {feed.items?.map((item,i)=>{
-                const[tc,tb]=TAG_COLS[item.tag]||[T.blush,T.blushSoft];
-                return(
+                const [tc,tb]=TAG_COLS[item.tag]||[T.blush,T.blushSoft];
+                return (
                   <div key={i} style={{flexShrink:0,width:200,background:T.card,borderRadius:14,border:"1px solid "+T.border,padding:"16px 16px 14px",display:"flex",flexDirection:"column",gap:8}}>
                     <span style={pl(tc,tb)}>{item.tag}</span>
                     <div style={{fontSize:14,fontWeight:700,color:T.cream,fontFamily:SERIF,lineHeight:1.3}}>{item.title}</div>
@@ -586,7 +610,7 @@ function App(){
           </div>
           <div style={{overflow:"hidden",padding:"4px 0 12px"}}>
             <div ref={beltRef} style={{display:"flex",gap:10,width:"max-content",willChange:"transform"}}>
-              {[...PAST,...PAST,...PAST].map((b,i)=><CoverSpine key={i} title={b.title} author={b.author} col={b.col} txt={b.txt} isbn={b.isbn} w={70} h={106}/>)}
+              {[...PAST,...PAST,...PAST].map((b,i)=><CoverSpine key={i} title={b.title} col={b.col} txt={b.txt} isbn={b.isbn} w={70} h={106}/>)}
             </div>
           </div>
           <div style={{textAlign:"center"}}>
@@ -599,6 +623,6 @@ function App(){
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-  </script>
+</script>
 </body>
 </html>
