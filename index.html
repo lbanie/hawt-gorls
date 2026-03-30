@@ -25,7 +25,7 @@ const {useState,useEffect,useRef} = React;
 
 const GROUP_PW = "hawt1";
 const BOOK = {title:"Martyr!",author:"Kaveh Akbar",genre:"Literary Fiction",setting:"New York City / Iran",spineColor:"#7B1F2E",spineText:"#F5D080"};
-const ROT = {currentHost:"Athena Levitch",currentPicker:"Laylee Banie",nextHost:"Erinne Davey",nextPicker:"Tyler Hill"};
+const ROT_DEFAULT = {currentHost:"",currentPicker:"",nextHost:"",nextPicker:""};
 const POLL_OPTS = [{day:"Thursday",date:"May 7"},{day:"Friday",date:"May 8"},{day:"Saturday",date:"May 9"},{day:"Sunday",date:"May 10"}];
 const ZOOM = "https://us05web.zoom.us/j/83873906720?pwd=03Q9be6hK9Vr4OdFXTmVCfQ8v86KWV.1";
 const NOTES = "https://www.icloud.com/notes/02539w5ZpE0nKd4aZd39sVSNQ#HAWT_GORLZ_WHO_READ";
@@ -52,14 +52,14 @@ const FOOD = {
 
 // ── LITERARY FEED — add a `link` field to make cards clickable ──
 const FEED = {items:[
-  {title:"The Familiar",author:"Leigh Bardugo",tag:"New Release",blurb:"Dark historical fantasy set in 15th-century Spain.",source:"NYT",link:"https://www.nytimes.com/2024/03/26/books/review/the-familiar-leigh-bardugo.html"},
-  {title:"James",author:"Percival Everett",tag:"Award Winner",blurb:"Pulitzer-winning reimagining of Huckleberry Finn.",source:"The Guardian",link:"https://www.theguardian.com/books/2024/may/14/james-by-percival-everett-review"},
-  {title:"All Fours",author:"Miranda July",tag:"Buzzy Read",blurb:"Wildly original midlife novel everyone is talking about.",source:"NPR Books",link:"https://www.npr.org/2024/05/29/1197964358/all-fours-miranda-july-review"},
-  {title:"The Women",author:"Kristin Hannah",tag:"Book Club Pick",blurb:"Epic saga of female nurses in Vietnam.",source:"Oprah Daily",link:"https://www.oprahdaily.com/entertainment/books/a46418091/the-women-kristin-hannah-review/"},
-  {title:"Intermezzo",author:"Sally Rooney",tag:"Critic's Darling",blurb:"Rooney's most mature novel — grief and complicated love.",source:"Vulture",link:"https://www.vulture.com/article/book-review-intermezzo-sally-rooney.html"},
-  {title:"The God of the Woods",author:"Liz Moore",tag:"Book Club Pick",blurb:"A missing girl, a summer camp, decades of secrets.",source:"TIME",link:"https://time.com/6994705/the-god-of-the-woods-review/"},
-  {title:"The Correspondent",author:"Virginia Evans",tag:"Debut Novel",blurb:"Epistolary debut hailed by Ann Patchett.",source:"The Atlantic",link:"https://www.theatlantic.com"},
-  {title:"Martyr!",author:"Kaveh Akbar",tag:"Critic's Darling",blurb:"Incandescent debut — addiction, grief and meaning.",source:"NYT",link:"https://www.nytimes.com/2024/01/19/books/review/martyrs-kaveh-akbar.html"}
+  {title:"The Familiar",author:"Leigh Bardugo",tag:"New Release",blurb:"Dark historical fantasy set in 15th-century Spain.",source:"Goodreads",link:"https://www.goodreads.com/book/show/61604756-the-familiar"},
+  {title:"James",author:"Percival Everett",tag:"Award Winner",blurb:"Pulitzer-winning reimagining of Huckleberry Finn.",source:"Goodreads",link:"https://www.goodreads.com/book/show/40539567-james"},
+  {title:"All Fours",author:"Miranda July",tag:"Buzzy Read",blurb:"Wildly original midlife novel everyone is talking about.",source:"Goodreads",link:"https://www.goodreads.com/book/show/125852273-all-fours"},
+  {title:"The Women",author:"Kristin Hannah",tag:"Book Club Pick",blurb:"Epic saga of female nurses in Vietnam.",source:"Goodreads",link:"https://www.goodreads.com/book/show/171191161-the-women"},
+  {title:"Intermezzo",author:"Sally Rooney",tag:"Critic's Darling",blurb:"Rooney's most mature novel — grief and complicated love.",source:"Goodreads",link:"https://www.goodreads.com/book/show/199822228-intermezzo"},
+  {title:"The God of the Woods",author:"Liz Moore",tag:"Book Club Pick",blurb:"A missing girl, a summer camp, decades of secrets.",source:"Goodreads",link:"https://www.goodreads.com/book/show/143741500-the-god-of-the-woods"},
+  {title:"The Correspondent",author:"Virginia Evans",tag:"Debut Novel",blurb:"Epistolary debut hailed by Ann Patchett.",source:"Goodreads",link:"https://www.goodreads.com/search?q=The+Correspondent+Virginia+Evans"},
+  {title:"Martyr!",author:"Kaveh Akbar",tag:"Critic's Darling",blurb:"Incandescent debut — addiction, grief and meaning.",source:"Goodreads",link:"https://www.goodreads.com/book/show/61714633-martyr"}
 ]};
 
 const NOMS0=[{id:1,title:"My Year of Rest and Relaxation",author:"Ottessa Moshfegh",nominatedBy:"Kayla",votes:3},{id:2,title:"Intermezzo",author:"Sally Rooney",nominatedBy:"Christie",votes:5},{id:3,title:"All Fours",author:"Miranda July",nominatedBy:"Danielle",votes:2},{id:4,title:"The Vegetarian",author:"Han Kang",nominatedBy:"Natalie",votes:4}];
@@ -116,7 +116,7 @@ const sl=c=>({background:c,color:["#D4A84A","#6AAA84"].includes(c)?"#152B20":"#F
 const pl=(c,bg)=>({background:bg,color:c,fontSize:10,fontWeight:700,padding:"3px 9px",borderRadius:20,letterSpacing:.4,textTransform:"uppercase",display:"inline-block",whiteSpace:"nowrap"});
 
 function mkICS(addr){
-  const loc=addr||ROT.currentHost+"'s place";
+  const loc=addr||((rot&&rot.currentHost)||"Host TBD")+"'s place";
   const ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//HawtGorlsWhoRead//EN","BEGIN:VEVENT","SUMMARY:Hawt Gorls Who Read - "+BOOK.title,"DESCRIPTION:Book: "+BOOK.title+"\\nHost: "+ROT.currentHost+"\\nZoom: "+ZOOM,"DTSTART;TZID=America/New_York:20260401T180000","DTEND;TZID=America/New_York:20260401T200000","LOCATION:"+loc,"END:VEVENT","END:VCALENDAR"].join("\r\n");
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar"}));
@@ -225,6 +225,7 @@ function App(){
   const [activeName,setActiveName]=useState("");
   const [mVotes,setMVotes]=useState([]);
   const [pollVotes,setPollVotes]=useState({Thursday:[],Friday:[],Saturday:[],Sunday:[]});
+  const [rot,setRot]=useState(ROT_DEFAULT);
   const [hostAddr,setHostAddr]=useState("");
   const [showFood,setShowFood]=useState(false);
   const [books,setBooks]=useState(PAST);
@@ -389,7 +390,7 @@ function App(){
   );
 
   if(view==="admin"&&adminOk){
-    const tabs=["overview","members","books","address"];
+    const tabs=["overview","members","rotation","books","address"];
     return(
       <div style={{background:T.bg,minHeight:"100vh",color:T.cream,paddingBottom:80}}>
         <Toast/><BottomNav/>
@@ -408,7 +409,7 @@ function App(){
             </div>
             <div style={crd()}>
               <div style={{fontSize:20,fontFamily:SERIF,color:T.cream,marginBottom:4}}>{BOOK.title}</div>
-              <div style={{fontSize:13,color:T.creamDim,marginBottom:12}}>Apr 1, 2026 · 6:00 PM · {ROT.currentHost}</div>
+              <div style={{fontSize:13,color:T.creamDim,marginBottom:12}}>Apr 1, 2026 · 6:00 PM · {rot.currentHost||"Host TBD"}</div>
               <button onClick={()=>mkICS(hostAddr)} style={sl(T.blush)}>Download .ics</button>
             </div>
           </>)}
@@ -459,6 +460,36 @@ function App(){
               <button onClick={()=>pop("Changes saved!")} style={sl(T.sage)}>Save all changes</button>
             </div>
           )}
+          {aTab==="rotation"&&(
+            <div>
+              <div style={{fontSize:13,color:T.creamDim,marginBottom:14,lineHeight:1.6}}>
+                Assign host and book picker for this month and next. Only members who said they <strong style={{color:T.sage}}>can host</strong> are shown.
+              </div>
+              {[
+                ["currentHost","This month's host","April"],
+                ["currentPicker","This month's book picker","April"],
+                ["nextHost","Next month's host","May"],
+                ["nextPicker","Next month's book picker","May"],
+              ].map(([key,label,month])=>(
+                <div key={key} style={crd({padding:"14px"})}>
+                  <label style={lbl}>{label} <span style={{color:T.blush}}>({month})</span></label>
+                  <select
+                    value={rot[key]||""}
+                    onChange={e=>setRot(prev=>({...prev,[key]:e.target.value}))}
+                    style={{...inp,background:"#fff"}}
+                  >
+                    <option value="">— Not assigned —</option>
+                    {members
+                      .filter(m=>m.rsvp!=="paused"&&(key.includes("Host")?m.canHost:true))
+                      .map(m=><option key={m.id} value={m.name}>{m.name}{key.includes("Host")&&m.canHost?" ✓":""}</option>)
+                    }
+                  </select>
+                  {rot[key]&&<div style={{fontSize:12,color:T.sage,marginTop:8}}>Assigned to {rot[key]}</div>}
+                </div>
+              ))}
+              <button onClick={()=>pop("Rotation saved!")} style={sl(T.sage)}>Save rotation</button>
+            </div>
+          )}
           {aTab==="address"&&(
             <div style={crd()}>
               <label style={lbl}>Meeting address</label>
@@ -478,15 +509,13 @@ function App(){
 
       {/* Hero */}
       <div style={{background:T.bg2,padding:"24px 16px 0",borderBottom:"1px solid "+T.border}}>
-        {/* Logo at top */}
-        <Logo/>
         <div style={{fontSize:10,fontWeight:700,color:T.blush,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10,display:"flex",alignItems:"center",gap:8}}>
           <div style={{width:16,height:1,background:T.blush}}/>Now Reading<div style={{width:16,height:1,background:T.blush}}/>
         </div>
         <div style={{fontSize:"clamp(28px, 9vw, 42px)",fontFamily:SERIF,color:T.cream,lineHeight:.95,letterSpacing:-1,marginBottom:8,wordBreak:"break-word"}}>{BOOK.title}</div>
         <div style={{fontSize:14,color:T.creamDim,fontStyle:"italic",marginBottom:16}}>by {BOOK.author}</div>
         <div style={{display:"flex",gap:16,marginBottom:20,flexWrap:"wrap",rowGap:10}}>
-          {[["Meeting","Apr 1, 2026 · 6 PM"],["Host",ROT.currentHost],["Picked by",ROT.currentPicker]].map(([k,v])=>(
+          {[["Meeting","Apr 1, 2026 · 6 PM"],["Host",rot.currentHost||"TBD"],["Picked by",rot.currentPicker||"TBD"]].map(([k,v])=>(
             <div key={k} style={{minWidth:0}}><div style={{fontSize:9,fontWeight:700,color:T.creamDim,letterSpacing:.7,textTransform:"uppercase",marginBottom:3}}>{k}</div><div style={{fontSize:13,fontWeight:600,color:T.cream,whiteSpace:"nowrap"}}>{v}</div></div>
           ))}
         </div>
@@ -545,13 +574,13 @@ function App(){
           <div style={{fontSize:10,fontWeight:700,color:T.sage,letterSpacing:1,textTransform:"uppercase",marginBottom:12}}>Up next</div>
           <div style={{background:T.bg3,borderRadius:12,padding:"12px",marginBottom:10}}>
             <div style={{fontSize:9,fontWeight:700,color:T.creamDim,letterSpacing:.7,textTransform:"uppercase",marginBottom:8}}>April</div>
-            <div style={{display:"flex",gap:10,marginBottom:6,alignItems:"center"}}><Av name={ROT.currentHost} size={26} idx={2}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{ROT.currentHost}</div><div style={{fontSize:11,color:T.creamDim}}>Hosting</div></div></div>
-            <div style={{display:"flex",gap:10,alignItems:"center"}}><Av name={ROT.currentPicker} size={26} idx={0}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{ROT.currentPicker}</div><div style={{fontSize:11,color:T.creamDim}}>Book picker</div></div></div>
+            <div style={{display:"flex",gap:10,marginBottom:6,alignItems:"center"}}><Av name={rot.currentHost||"?"} size={26} idx={2}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{rot.currentHost||"TBD"}</div><div style={{fontSize:11,color:T.creamDim}}>Hosting</div></div></div>
+            <div style={{display:"flex",gap:10,alignItems:"center"}}><Av name={rot.currentPicker||"?"} size={26} idx={0}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{rot.currentPicker||"TBD"}</div><div style={{fontSize:11,color:T.creamDim}}>Book picker</div></div></div>
           </div>
           <div style={{background:T.blushSoft,border:"1px solid "+T.blush+"33",borderRadius:12,padding:"12px"}}>
             <div style={{fontSize:9,fontWeight:700,color:T.blush,letterSpacing:.7,textTransform:"uppercase",marginBottom:8}}>May</div>
-            <div style={{display:"flex",gap:10,marginBottom:6,alignItems:"center"}}><Av name={ROT.nextHost} size={26} idx={3}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{ROT.nextHost}</div><div style={{fontSize:11,color:T.creamDim}}>Next host</div></div></div>
-            <div style={{display:"flex",gap:10,alignItems:"center"}}><Av name={ROT.nextPicker} size={26} idx={1}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{ROT.nextPicker}</div><div style={{fontSize:11,color:T.creamDim}}>Next picker</div></div></div>
+            <div style={{display:"flex",gap:10,marginBottom:6,alignItems:"center"}}><Av name={rot.nextHost||"?"} size={26} idx={3}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{rot.nextHost||"TBD"}</div><div style={{fontSize:11,color:T.creamDim}}>Next host</div></div></div>
+            <div style={{display:"flex",gap:10,alignItems:"center"}}><Av name={rot.nextPicker||"?"} size={26} idx={1}/><div><div style={{fontSize:13,fontWeight:700,color:T.cream}}>{rot.nextPicker||"TBD"}</div><div style={{fontSize:11,color:T.creamDim}}>Next picker</div></div></div>
           </div>
         </div>
 
